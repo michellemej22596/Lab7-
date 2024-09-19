@@ -1,6 +1,8 @@
 # Lab7-
 Michelle Mejía 22596 y  Silvia Illescas 22376
 
+ENLACE DE YOUTUBE CON EXPLICACIÓN: https://youtu.be/a51OKaoF3Y8
+
 Este proyecto tiene como objetivo la simplificación de gramáticas contextuales libres (CFGs) utilizando Python. El programa carga archivos de texto que contienen gramáticas y realiza las siguientes operaciones:
 
 1. Validación del formato de las gramáticas.
