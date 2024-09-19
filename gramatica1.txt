@@ -1,4 +1,3 @@
-S -> 0A0 | 1B1 | BB
-A -> C
-B -> S | A
-C -> S | e
+S -> AB | a
+A -> aAa | e
+B -> BB | e

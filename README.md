@@ -17,10 +17,10 @@ El programa está diseñado para trabajar con dos archivos de gramáticas propor
 git clone https://github.com/michellemej22596/Lab7-.git
 
 2. **Preparar el entorno**:
- Asegúrate de tener Python instalado en tu sistema.
+Asegúrate de tener Python instalado en tu sistema.
 
-3.**Ejecutar el programa**:
- Para ejecutar el programa, navega a la carpeta donde se encuentra el archivo simplificar_gramatica.py y ejecuta el siguiente comando:
+3. **Ejecutar el programa**:
+Para ejecutar el programa, navega a la carpeta donde se encuentra el archivo simplificar_gramatica.py y ejecuta el siguiente comando:
 
 python simplificar_gramatica.py
 

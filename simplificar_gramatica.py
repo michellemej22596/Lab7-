@@ -64,7 +64,7 @@ def eliminar_producciones_epsilon(producciones):
         nuevas_partes = set()
 
         for parte in partes:
-            if parte != "ε":
+            if parte != "e":
                 combinaciones = [parte]
                 for simbolo in parte:
                     if simbolo in anulables:
@@ -178,101 +178,123 @@ def reemplazar_terminales(producciones):
                     nueva_parte.append(nuevos_terminales[simbolo])
                 else:
                     nueva_parte.append(simbolo)
+            # Reemplazar terminales solo si la parte contiene tanto terminales como no-terminales
             nuevas_producciones.append(f"{izquierda} -> {''.join(nueva_parte)}")
     
     return nuevas_producciones, nuevos_terminales
 
+
+# Asegurarse que cada producción tenga exactamente dos no-terminales
 # Asegurarse que cada producción tenga exactamente dos no-terminales
 def forzar_producciones_binarias(producciones):
     nuevas_producciones = []
     nuevo_simbolo = iter(string.ascii_uppercase)  # Para asignar nuevos no-terminales
+    simbolos_usados = set()  # Llevar un control de los símbolos ya usados
 
     for produccion in producciones:
         izquierda, derecha = produccion.split(" -> ")
         partes = derecha.split(" | ")
 
         for parte in partes:
-            if len(parte) > 2:
-                # Dividir en producciones binarias
+            if len(parte) > 2:  # Si hay más de dos símbolos en el lado derecho
                 anterior = parte[0]
                 for i in range(1, len(parte) - 1):
                     nuevo_no_terminal = next(nuevo_simbolo)
+                    while nuevo_no_terminal in simbolos_usados:  # Evitar duplicados
+                        nuevo_no_terminal = next(nuevo_simbolo)
+                    simbolos_usados.add(nuevo_no_terminal)
                     nuevas_producciones.append(f"{anterior} -> {parte[i]}{nuevo_no_terminal}")
                     anterior = nuevo_no_terminal
                 nuevas_producciones.append(f"{anterior} -> {parte[-2:]}")  # La última pareja
             else:
                 nuevas_producciones.append(f"{izquierda} -> {parte}")
     
+    # Eliminar producciones repetidas al final
+    nuevas_producciones = eliminar_producciones_repetidas(nuevas_producciones)
+    
     return nuevas_producciones
 
+
+
+def eliminar_producciones_ciclicas(producciones):
+    nuevas_producciones = []
+    for produccion in producciones:
+        izquierda, derecha = produccion.split(" -> ")
+        partes = derecha.split(" | ")
+        # Eliminar producciones donde el lado derecho es igual al izquierdo (producción cíclica)
+        partes = [parte for parte in partes if parte != izquierda]
+        if partes:
+            nuevas_producciones.append(f"{izquierda} -> {' | '.join(partes)}")
+    return nuevas_producciones
+
+# Función para imprimir producciones
+def imprimir_producciones(titulo, producciones):
+    print(f"\n{titulo}:")
+    for p in producciones:
+        print(p)
 
 # Ejemplo de uso ELIMINAR 
 producciones_sin_epsilon_1 = eliminar_producciones_epsilon(producciones_gramatica1)
 producciones_sin_epsilon_2 = eliminar_producciones_epsilon(producciones_gramatica2)
 
-print("Gramática 1 sin producciones-ε:")
-for p in producciones_sin_epsilon_1:
-    print(p)
+# Eliminar producciones repetidas después de eliminar producciones-𝜀
+producciones_sin_epsilon_1 = eliminar_producciones_repetidas(producciones_sin_epsilon_1)
+producciones_sin_epsilon_2 = eliminar_producciones_repetidas(producciones_sin_epsilon_2)
 
-print("\nGramática 2 sin producciones-ε:")
-for p in producciones_sin_epsilon_2:
-    print(p)
+imprimir_producciones("Gramática 1 sin producciones-e", producciones_sin_epsilon_1)
+imprimir_producciones("Gramática 2 sin producciones-e", producciones_sin_epsilon_2)
 
 # Ejemplo de uso PRODUCCIONES UNITARIAS
 producciones_sin_unitarias_1 = eliminar_producciones_unitarias(producciones_sin_epsilon_1)
 producciones_sin_unitarias_2 = eliminar_producciones_unitarias(producciones_sin_epsilon_2)
 
-print("Gramática 1 sin producciones unitarias:")
-for p in producciones_sin_unitarias_1:
-    print(p)
+# Eliminar producciones repetidas después de eliminar producciones unitarias
+producciones_sin_unitarias_1 = eliminar_producciones_repetidas(producciones_sin_unitarias_1)
+producciones_sin_unitarias_2 = eliminar_producciones_repetidas(producciones_sin_unitarias_2)
 
-print("\nGramática 2 sin producciones unitarias:")
-for p in producciones_sin_unitarias_2:
-    print(p)
+imprimir_producciones("Gramática 1 sin producciones unitarias", producciones_sin_unitarias_1)
+imprimir_producciones("Gramática 2 sin producciones unitarias", producciones_sin_unitarias_2)
 
-    # Ejemplo de uso SIMBOLOS INUTILES
-producciones_utiles_1 = eliminar_simbolos_inutiles(producciones_sin_unitarias_1, "S")
-producciones_utiles_2 = eliminar_simbolos_inutiles(producciones_sin_unitarias_2, "S")
+# Ejemplo de uso ELIMINAR PRODUCCIONES CÍCLICAS
+producciones_sin_ciclicas_1 = eliminar_producciones_ciclicas(producciones_sin_unitarias_1)
+producciones_sin_ciclicas_2 = eliminar_producciones_ciclicas(producciones_sin_unitarias_2)
 
-print("Gramática 1 sin símbolos inútiles:")
-for p in producciones_utiles_1:
-    print(p)
+# Eliminar producciones repetidas después de eliminar producciones cíclicas
+producciones_sin_ciclicas_1 = eliminar_producciones_repetidas(producciones_sin_ciclicas_1)
+producciones_sin_ciclicas_2 = eliminar_producciones_repetidas(producciones_sin_ciclicas_2)
 
-print("\nGramática 2 sin símbolos inútiles:")
-for p in producciones_utiles_2:
-    print(p)
+imprimir_producciones("Gramática 1 sin producciones cíclicas", producciones_sin_ciclicas_1)
+imprimir_producciones("Gramática 2 sin producciones cíclicas", producciones_sin_ciclicas_2)
 
-    # Ejemplo de USO PRODUCCIONES REPETIDAS 
-producciones_optimizadas_1 = eliminar_producciones_repetidas(producciones_utiles_1)
-producciones_optimizadas_2 = eliminar_producciones_repetidas(producciones_utiles_2)
+# Ejemplo de uso SIMBOLOS INUTILES
+producciones_utiles_1 = eliminar_simbolos_inutiles(producciones_sin_ciclicas_1, "S")
+producciones_utiles_2 = eliminar_simbolos_inutiles(producciones_sin_ciclicas_2, "S")
 
-print("Gramática 1 optimizada:")
-for p in producciones_optimizadas_1:
-    print(p)
+# Eliminar producciones repetidas después de eliminar símbolos inútiles
+producciones_utiles_1 = eliminar_producciones_repetidas(producciones_utiles_1)
+producciones_utiles_2 = eliminar_producciones_repetidas(producciones_utiles_2)
 
-print("\nGramática 2 optimizada:")
-for p in producciones_optimizadas_2:
-    print(p)
+imprimir_producciones("Gramática 1 sin símbolos inútiles", producciones_utiles_1)
+imprimir_producciones("Gramática 2 sin símbolos inútiles", producciones_utiles_2)
 
-    # Ejemplo de uso CHOMSKY
-producciones_optimizadas_1, terminales_1 = reemplazar_terminales(producciones_utiles_1)
-producciones_optimizadas_2, terminales_2 = reemplazar_terminales(producciones_utiles_2)
+# Ejemplo de uso CHOMSKY - Reemplazar terminales
+producciones_con_terminales_1, terminales_1 = reemplazar_terminales(producciones_utiles_1)
+producciones_con_terminales_2, terminales_2 = reemplazar_terminales(producciones_utiles_2)
 
-print("Gramática 1 con terminales reemplazados:")
-for p in producciones_optimizadas_1:
-    print(p)
+# Eliminar producciones repetidas después de reemplazar terminales
+producciones_con_terminales_1 = eliminar_producciones_repetidas(producciones_con_terminales_1)
+producciones_con_terminales_2 = eliminar_producciones_repetidas(producciones_con_terminales_2)
 
-print("\nGramática 2 con terminales reemplazados:")
-for p in producciones_optimizadas_2:
-    print(p)
+imprimir_producciones("Gramática 1 con terminales reemplazados", producciones_con_terminales_1)
+imprimir_producciones("Gramática 2 con terminales reemplazados", producciones_con_terminales_2)
 
-producciones_binarias_1 = forzar_producciones_binarias(producciones_optimizadas_1)
-producciones_binarias_2 = forzar_producciones_binarias(producciones_optimizadas_2)
+# Ejemplo de uso CNF - Forzar producciones binarias
+producciones_binarias_1 = forzar_producciones_binarias(producciones_con_terminales_1)
+producciones_binarias_2 = forzar_producciones_binarias(producciones_con_terminales_2)
 
-print("\nGramática 1 en Forma Normal de Chomsky:")
-for p in producciones_binarias_1:
-    print(p)
+# Eliminar producciones repetidas después de convertir a forma binaria
+producciones_binarias_1 = eliminar_producciones_repetidas(producciones_binarias_1)
+producciones_binarias_2 = eliminar_producciones_repetidas(producciones_binarias_2)
 
-print("\nGramática 2 en Forma Normal de Chomsky:")
-for p in producciones_binarias_2:
-    print(p)
+imprimir_producciones("Gramática 1 en Forma Normal de Chomsky", producciones_binarias_1)
+imprimir_producciones("Gramática 2 en Forma Normal de Chomsky", producciones_binarias_2)
